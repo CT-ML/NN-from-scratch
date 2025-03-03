@@ -1,6 +1,14 @@
 import pickle
 import numpy as np
 
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
+def tanh(x):
+    return np.tanh(x)
+
+def step_function(x):
+    return np.where(x >= 0, 1, 0)
 
 class NeuralNetwork:
     def __init__(self, nb_of_neurons_per_layer, activation_function_array, learning_rate, momentum_turn):
@@ -11,14 +19,24 @@ class NeuralNetwork:
         self.nb_of_layers = len(nb_of_neurons_per_layer)
 
         #TODO optimize vector lengths
-        self.internal_activity_vector = np.zeros(self.nb_of_layers - 1, self.nb_of_neurons_per_layer[1]) # output before activation function
-        self.nonlinear_output_vcetor = np.zeros(self.nb_of_layers - 1, self.nb_of_neurons_per_layer[1])
+        self.internal_activity_vector = [] # output before activation function
+        self.nonlinear_output_vector = [] # output after activation function
 
-        self.local_gradient_vector = np.zeros(self.nb_of_layers - 1, self.nb_of_neurons_per_layer[1])
+        self.local_gradient_vector = []
 
-        self.threshold_vector = np.zeros(self.nb_of_layers - 1)
+        for layer in range(self.nb_of_layers):
+            self.internal_activity_vector.append(np.zeros((self.nb_of_neurons_per_layer[layer])))
+            self.nonlinear_output_vector.append(np.zeros((self.nb_of_neurons_per_layer[layer])))
+            self.local_gradient_vector.append(np.zeros((self.nb_of_neurons_per_layer[layer])))
 
-        # TODO define activation functions: sigmoide, tanh, ...
+
+        self.threshold_vector = np.zeros(self.nb_of_layers)
+
+        self.activations = {
+            "sigmoid": sigmoid,
+            "tanh": tanh,
+            "step": step_function
+        }
 
         self.dataset_inputs = np.array([])
         self.dataset_outputs = np.array([])
@@ -26,38 +44,48 @@ class NeuralNetwork:
         # weight initialization
 
 
-        # Initialize a 3D list with all elements set to 0
+        # Initialize a lsit of numpy 2d arrays
         self.weights = []
 
-        for layer in range(len(nb_of_neurons_per_layer) - 1):
-            layer_weights = []
-            
-            # Number of neurons in the current layer
-            neurons_in_layer = nb_of_neurons_per_layer[layer]
-            
-            # Number of neurons in the next layer
-            neurons_in_next_layer = nb_of_neurons_per_layer[layer + 1]
-            
-            for neuron in range(neurons_in_layer):
-                # Create a list of 0's for the current neuron, with size equal to the number of neurons in the next layer
-                neuron_weights = [0 for _ in range(neurons_in_next_layer)]
-                layer_weights.append(neuron_weights)
-            
-            self.weights.append(layer_weights)
+        for layer in range(self.nb_of_layers - 1):
+            # create neurons_in_layer x neurons_in_next_layer matrix for each layer
+            self.weights.append(np.ones((self.nb_of_neurons_per_layer[layer], self.nb_of_neurons_per_layer[layer + 1])))
 
             # randomise weights
-            for layer in range(self.nb_of_layers - 1): # layer
-                for input in range(self.nb_of_neurons_per_layer[layer]): # neuron
-                    for connection in range(self.nb_of_neurons_per_layer[layer + 1]): # connection
-                        self.weights[layer][input][connection] = np.random.rand()
+        # for layer in range(self.nb_of_layers - 1): # layer
+        #     for input in range(self.nb_of_neurons_per_layer[layer]): # neuron
+        #         for connection in range(self.nb_of_neurons_per_layer[layer + 1]): # connection
+        #             self.weights[layer][input, connection] = np.random.rand()
 
 
     def forward_calculation(self):
-        for layer in range(self.nb_of_layers):
-            # for each neuron in next layer, iterate through neurons in previous layer
-            for next_neuron in range(self.nb_of_neurons_per_layer[layer + 1]):
-                self.internal_activity_vector[layer + 1][next_neuron] = threshold_vector[layer] * -1
-                for previous_neuron in range(self.nb_of_neurons_per_layer[layer]):
-                    self.internal_activity_vector[layer + 1][next_neuron] += weights[layer][previous_neuron][next_neuron] * self.nonlinear_output_vector[layer][previous_neuron]
-            # apply activation funcion
-            self.nonlinear_output_vector[layer][next_neuron] = self.activation_function(self.internal_activity_vector[layer][previous_neuron])
+        for layer in range(self.nb_of_layers - 1):
+            #TODO add bias
+            self.internal_activity_vector[layer + 1] = np.dot(self.nonlinear_output_vector[layer], self.weights[layer])
+            # apply activation function
+            self.nonlinear_output_vector[layer + 1] = self.activations[self.activation_function_array[layer]](self.internal_activity_vector[layer + 1])
+
+def main():
+    # Define network parameters
+    nb_of_neurons_per_layer = [1, 1, 1]  # Input layer, one hidden layer, output layer
+    activation_function_array = ["sigmoid", "sigmoid", "sigmoid"]  # Activation functions per layer
+    learning_rate = 0.01
+    momentum_turn = 0.9
+
+    # Create neural network
+    nn = NeuralNetwork(nb_of_neurons_per_layer, activation_function_array, learning_rate, momentum_turn)
+
+    # Dummy input
+    input_data = np.array([1])
+
+    # Assign input to the first layer's nonlinear output vector
+    nn.nonlinear_output_vector[0] = input_data
+
+    # Perform forward calculation
+    nn.forward_calculation()
+
+    # Print the output of the last layer
+    print("Output:", nn.nonlinear_output_vector[-1])
+
+if __name__ == "__main__":
+    main()
