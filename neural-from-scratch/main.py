@@ -49,7 +49,8 @@ class NeuralNetwork:
 
         for layer in range(self.nb_of_layers - 1):
             # create neurons_in_layer x neurons_in_next_layer matrix for each layer
-            self.weights.append(np.ones((self.nb_of_neurons_per_layer[layer], self.nb_of_neurons_per_layer[layer + 1])))
+            self.weights.append(np.random.randn(self.nb_of_neurons_per_layer[layer],self.nb_of_neurons_per_layer[layer + 1]))
+
 
             # randomise weights
         # for layer in range(self.nb_of_layers - 1): # layer
