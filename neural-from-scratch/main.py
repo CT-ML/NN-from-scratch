@@ -12,7 +12,8 @@ def step_function(x):
 
 class NeuralNetwork:
     def __init__(self, nb_input, nb_of_neurons_per_layer, activation_function_array, learning_rate, momentum_turn):
-        self.nb_of_neurons_per_layer = [nb_input] + nb_of_neurons_per_layer
+        nb_of_neurons_per_layer.insert(0,nb_input)
+        self.nb_of_neurons_per_layer =  nb_of_neurons_per_layer
         self.activation_function_array = activation_function_array # activation function at the end of each layer
         self.learning_rate = learning_rate
         self.momentum_turn = momentum_turn
@@ -24,14 +25,14 @@ class NeuralNetwork:
         self.threshold_vector = []
         self.local_gradient_vector = []
 
-        self.nonlinear_output_vector.append(np.zeros((self.nb_of_neurons_per_layer[0]))) # treat input vector as imaginary layer
-        for layer in range(1, self.nb_of_layers-1, 1):
+        for layer in range( self.nb_of_layers-1):
             self.internal_activity_vector.append(np.zeros((self.nb_of_neurons_per_layer[layer])))
             self.nonlinear_output_vector.append(np.zeros((self.nb_of_neurons_per_layer[layer])))
             self.local_gradient_vector.append(np.zeros((self.nb_of_neurons_per_layer[layer])))
             self.threshold_vector.append(np.zeros(self.nb_of_neurons_per_layer[layer]))
 
-        
+        # we are filling all the list[0] with 0 but for activity and other it is meaningless
+
 
         self.activations = {
             "sigmoid": sigmoid,
@@ -48,7 +49,7 @@ class NeuralNetwork:
         # Initialize a lsit of numpy 2d arrays
         self.weights = []
 
-        for layer in range(self.nb_of_layers - 2):
+        for layer in range(self.nb_of_layers - 1):
             # create neurons_in_layer x neurons_in_next_layer matrix for each layer
             self.weights.append(np.random.randn(self.nb_of_neurons_per_layer[layer],self.nb_of_neurons_per_layer[layer + 1]))
 
@@ -61,7 +62,7 @@ class NeuralNetwork:
 
 
     def forward_calculation(self):
-        for layer in range(1, self.nb_of_layers - 1):
+        for layer in range(1, self.nb_of_layers - 1): 
             #TODO add bias
             self.internal_activity_vector[layer] = np.dot(self.nonlinear_output_vector[layer-1], self.weights[layer-1])
             # apply activation function
@@ -73,12 +74,13 @@ def main():
     activation_function_array = ["sigmoid", "sigmoid", "sigmoid"]  # Activation functions per layer
     learning_rate = 0.01
     momentum_turn = 0.9
+    nb_input=3
 
     # Create neural network
-    nn = NeuralNetwork(nb_of_neurons_per_layer, activation_function_array, learning_rate, momentum_turn)
+    nn = NeuralNetwork(nb_input, nb_of_neurons_per_layer, activation_function_array, learning_rate, momentum_turn)
 
     # Dummy input
-    input_data = np.array([1])
+    input_data = np.array([1,1,1])
 
     # Assign input to the first layer's nonlinear output vector
     nn.nonlinear_output_vector[0] = input_data
