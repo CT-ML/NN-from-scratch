@@ -12,11 +12,11 @@ def step_function(x):
 
 class NeuralNetwork:
     def __init__(self, nb_input, nb_of_neurons_per_layer, activation_function_array, learning_rate, momentum_turn):
-        self.nb_of_neurons_per_layer = nb_of_neurons_per_layer.insert(0, nb_input)
+        self.nb_of_neurons_per_layer = [nb_input] + nb_of_neurons_per_layer
         self.activation_function_array = activation_function_array # activation function at the end of each layer
         self.learning_rate = learning_rate
         self.momentum_turn = momentum_turn
-        self.nb_of_layers = len(nb_of_neurons_per_layer)
+        self.nb_of_layers = len(self.nb_of_neurons_per_layer)
 
         #TODO optimize vector lengths
         self.internal_activity_vector = [] # output before activation function
