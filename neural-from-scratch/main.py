@@ -12,7 +12,7 @@ def step_function(x):
 
 class NeuralNetwork:
     def __init__(self, nb_input, nb_of_neurons_per_layer, activation_function_array, learning_rate, momentum_turn):
-        nb_of_neurons_per_layer.insert(0,nb_input)
+        nb_of_neurons_per_layer.insert(0,nb_input+1) # add bias
         self.nb_of_neurons_per_layer =  nb_of_neurons_per_layer
         self.activation_function_array = activation_function_array # activation function at the end of each layer
         self.learning_rate = learning_rate
@@ -26,8 +26,10 @@ class NeuralNetwork:
         self.local_gradient_vector = []
 
         for layer in range( self.nb_of_layers-1):
+            currentOut=np.zeros((self.nb_of_neurons_per_layer[layer]))
+            currentOut = np.insert(currentOut, 0, -1) # adding bias to each layer
+            self.nonlinear_output_vector.append(currentOut)
             self.internal_activity_vector.append(np.zeros((self.nb_of_neurons_per_layer[layer])))
-            self.nonlinear_output_vector.append(np.zeros((self.nb_of_neurons_per_layer[layer])))
             self.local_gradient_vector.append(np.zeros((self.nb_of_neurons_per_layer[layer])))
             self.threshold_vector.append(np.zeros(self.nb_of_neurons_per_layer[layer]))
 
@@ -68,6 +70,13 @@ class NeuralNetwork:
             # apply activation function
             self.nonlinear_output_vector[layer] = self.activations[self.activation_function_array[layer-1]](self.internal_activity_vector[layer])
             #TODO combine
+
+    def setInputs(self, input_data):
+        input_data = np.insert(input_data, 0, -1)  # Add bias term at index 0
+        #TODO no need to insert input data anymore since it is already set to -1 above for the bias 
+        self.nonlinear_output_vector[0] = input_data
+
+
 def main():
     # Define network parameters
     nb_of_neurons_per_layer = [1, 1, 1]  # Input layer, one hidden layer, output layer
@@ -83,7 +92,8 @@ def main():
     input_data = np.array([1,1,1])
 
     # Assign input to the first layer's nonlinear output vector
-    nn.nonlinear_output_vector[0] = input_data
+    nn.setInputs(input_data)
+
 
     # Perform forward calculation
     nn.forward_calculation()
@@ -93,3 +103,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+ 
