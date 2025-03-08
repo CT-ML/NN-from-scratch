@@ -7,8 +7,16 @@ def sigmoid(x):
 def tanh(x):
     return np.tanh(x)
 
-def step_function(x):
-    return np.where(x >= 0, 1, 0)
+
+#y is sigmoid(v)
+def sigmoid_grad(y):
+    return np.multiply(y, 1 - y)
+
+
+#y is tanh(v)
+def tanh_grad(y):
+    return np.multiply(1 - np.square(y), 1)
+
 
 class NeuralNetwork:
     def __init__(self, nb_input, nb_of_neurons_per_layer, activation_function_array, learning_rate, momentum_turn):
@@ -41,9 +49,13 @@ class NeuralNetwork:
 
         self.activations = {
             "sigmoid": sigmoid,
-            "tanh": tanh,
-            "step": step_function
+            "tanh": tanh
         }
+        self.activations_gradient={
+            "sigmoid": sigmoid_grad,
+            "tanh": tanh_grad
+        }
+        
 
         self.dataset_inputs = np.array([])
         self.dataset_outputs = np.array([])
@@ -74,8 +86,8 @@ class NeuralNetwork:
     def forward_calculation(self):
         for layer in range(1, self.nb_of_layers): 
             #TODO add bias
-            print("self.nonlinear_output_vector["+str(layer-1)+"]: " +str(self.nonlinear_output_vector[layer-1]))
-            print("self.weights["+str(layer-1)+"]: "+str(self.weights[layer-1]))
+          #  print("self.nonlinear_output_vector["+str(layer-1)+"]: " +str(self.nonlinear_output_vector[layer-1]))
+           # print("self.weights["+str(layer-1)+"]: "+str(self.weights[layer-1]))
             self.internal_activity_vector[layer] = np.dot(self.nonlinear_output_vector[layer-1], self.weights[layer-1])
             # apply activation function
             self.nonlinear_output_vector[layer][0 if layer==self.nb_of_layers-1 else 1 :] = self.activations[self.activation_function_array[layer-1]](self.internal_activity_vector[layer])
@@ -89,26 +101,31 @@ class NeuralNetwork:
 
     def backward_calculation(self):
         self.local_gradient_vector[self.nb_of_layers - 1] = self.error_vector * \
-            (self.nonlinear_output_vector[self.nb_of_layers - 1] * (1 - self.nonlinear_output_vector[self.nb_of_layers - 1]))
+            (self.activations_gradient[self.activation_function_array[self.nb_of_layers - 2]](self.nonlinear_output_vector[self.nb_of_layers - 1]))
 
-        for layer in range(self.nb_of_layers, 1, -1):
-            self.local_gradient_vector[layer] = (self.nonlinear_output_vector[layer] * (1 - self.nonlinear_output_vector[layer])) * \
-                np.dot(self.local_gradient_vector[layer + 1], self.weights[layer + 1])
-        
-        for layer in range(1, self.nb_of_layers - 1):
-            delta_weights = self.weights[layer] + self.momentum_turn * (self.weights[layer] - self.old_weights[layer]) + \
-                self.learning_rate * (local_gradient_vector[layer] * self.nonlinear_output_vector[layer - 1])
+
+        for layer in range(self.nb_of_layers-2, 0, -1):
+
+            self.local_gradient_vector[layer] = (self.activations_gradient[self.activation_function_array[layer]](self.nonlinear_output_vector[layer][1:])) * \
+                np.dot(self.weights[layer][1:], self.local_gradient_vector[layer + 1])
+
+        for layer in range( self.nb_of_layers - 1):
+            delta_weights = self.momentum_turn * (self.weights[layer]-self.old_weights[layer]) \
+                + self.learning_rate * np.outer(self.nonlinear_output_vector[layer], self.local_gradient_vector[layer + 1])
             self.old_weights[layer] = self.weights[layer]
 
             self.weights[layer] = self.weights[layer] + delta_weights
             
+        print("current weights: "+str(self.weights))
+        print("old weights: "+str(self.old_weights))
+
             
 def main():
     # Define network parameters
     nb_of_neurons_per_layer = [3, 2, 1]  # Input layer, one hidden layer, output layer
     activation_function_array = ["sigmoid", "sigmoid", "sigmoid"]  # Activation functions per layer
     learning_rate = 0.01
-    momentum_turn = 0.9
+    momentum_turn = 0.7
     nb_input=3
 
     # Create neural network
@@ -126,6 +143,10 @@ def main():
     nn.forward_calculation()
 
     # Print the output of the last layer
+    print("Output:", nn.nonlinear_output_vector[-1])
+    print("Error:", nn.error_vector)
+    nn.backward_calculation()
+    nn.forward_calculation()
     print("Output:", nn.nonlinear_output_vector[-1])
     print("Error:", nn.error_vector)
 
