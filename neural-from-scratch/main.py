@@ -1,11 +1,18 @@
 import pickle
 import numpy as np
+import pandas as pd
 
 def sigmoid(x):
     return 1 / (1 + np.exp(-x))
 
 def tanh(x):
     return np.tanh(x)
+
+def step_function(x):
+    return np.where(x >= 0, 1, 0)
+
+def step_function_grad(y):
+    return np.zeros_like(y)
 
 
 #y is sigmoid(v)
@@ -20,7 +27,8 @@ def tanh_grad(y):
 
 class NeuralNetwork:
     def __init__(self, nb_input, nb_of_neurons_per_layer, activation_function_array, learning_rate, momentum_turn):
-        nb_of_neurons_per_layer.insert(0,nb_input)
+        # inserting first layer (inputs) from main no need for this
+        # nb_of_neurons_per_layer.insert(0, nb_input)
         self.nb_of_neurons_per_layer =  nb_of_neurons_per_layer
         self.activation_function_array = activation_function_array # activation function at the end of each layer
         self.learning_rate = learning_rate
@@ -49,11 +57,13 @@ class NeuralNetwork:
 
         self.activations = {
             "sigmoid": sigmoid,
-            "tanh": tanh
+            "tanh": tanh,
+            "step": step_function,
         }
         self.activations_gradient={
             "sigmoid": sigmoid_grad,
-            "tanh": tanh_grad
+            "tanh": tanh_grad,
+            "step": step_function_grad,
         }
         
 
@@ -116,39 +126,108 @@ class NeuralNetwork:
 
             self.weights[layer] = self.weights[layer] + delta_weights
             
-        print("current weights: "+str(self.weights))
-        print("old weights: "+str(self.old_weights))
+        # print("current weights: "+str(self.weights))
+        # print("old weights: "+str(self.old_weights))
 
             
+# def main():
+#     # Define network parameters
+#     nb_of_neurons_per_layer = [3, 3, 3, 1]  # Input layer, one hidden layer, output layer
+#     activation_function_array = ["sigmoid", "sigmoid", "sigmoid", "sigmoid"]  # Activation functions per layer
+#     learning_rate = 0.01
+#     momentum_turn = 0.7
+#     nb_input=3
+
+#     # Create neural network
+#     nn = NeuralNetwork(nb_input, nb_of_neurons_per_layer, activation_function_array, learning_rate, momentum_turn)
+
+#     # Dummy input
+#     input_data = np.array([1, 1, 1])
+
+#     # Assign input to the first layer's nonlinear output vector
+#     nn.setInputs(input_data)
+
+#     nn.dataset_outputs = np.array([0])
+
+#     # Perform forward calculation
+#     nn.forward_calculation()
+
+#     # Print the output of the last layer
+#     print("Output:", nn.nonlinear_output_vector[-1])
+#     print("Error:", nn.error_vector)
+#     for _ in range(1000000):
+#         nn.backward_calculation()
+#         nn.forward_calculation()
+#         print("Output:", nn.nonlinear_output_vector[-1])
+#         print("Error:", nn.error_vector)
+
+
 def main():
-    # Define network parameters
-    nb_of_neurons_per_layer = [3, 2, 1]  # Input layer, one hidden layer, output layer
-    activation_function_array = ["sigmoid", "sigmoid", "sigmoid"]  # Activation functions per layer
-    learning_rate = 0.01
-    momentum_turn = 0.7
-    nb_input=3
+    # Load the dataset from the CSV file
+    data = pd.read_csv('data/wisc_bc_data_normalized.csv')
+
+    # Define the number of neurons per layer (dynamic based on input size)
+    input_size = data.shape[1] - 1  # Assuming the first column is the output
+    nb_of_neurons_per_layer = np.arange(input_size, 0, -1)  # Array with decreasing neurons for each layer
+
+    # Define activation functions per layer (sigmoid for all layers)
+    activation_function_array = []
+    for _ in range(len(nb_of_neurons_per_layer) - 1):
+        activation_function_array.append("sigmoid")
+    
+
+    print(activation_function_array)
+
+    # Set learning parameters
+    learning_rate = 0.005
+    momentum_turn = 0.3
+    error_threshold = 0.01  # Define the error threshold for stopping
 
     # Create neural network
-    nn = NeuralNetwork(nb_input, nb_of_neurons_per_layer, activation_function_array, learning_rate, momentum_turn)
+    nn = NeuralNetwork(input_size, nb_of_neurons_per_layer, activation_function_array, learning_rate, momentum_turn)
+    print(nb_of_neurons_per_layer)
+    # Start training loop
+    epoch = 0
+    while True:
+        epoch += 1
+        print(f"Epoch {epoch}:")
+        shuffled_data = data.sample(frac=1, random_state=None)
+        # Split the dataset into inputs and outputs (no shuffle)
+        input_data = shuffled_data.iloc[:, 1:].values  # All columns except the first as input
+        output_data = shuffled_data.iloc[:, 0].values  # First column as output
 
-    # Dummy input
-    input_data = np.array([1, 1, 1])
+        total_error = 0
+        # Iterate through the dataset for training
+        for i in range(input_data.shape[0]):
+            # Set inputs and expected output for each training example
+            nn.setInputs(input_data[i])
+            nn.dataset_outputs = np.array([output_data[i]])
 
-    # Assign input to the first layer's nonlinear output vector
-    nn.setInputs(input_data)
+            # Perform forward calculation
+            nn.forward_calculation()
 
-    nn.dataset_outputs = np.array([0])
+            # Calculate and accumulate the error
+            total_error += abs(nn.error_vector)
+            nn.backward_calculation()
 
-    # Perform forward calculation
-    nn.forward_calculation()
+            # Print the output, desired output, and error for the current input
+            print(f"Sample {i+1} - Predicted Output: {nn.nonlinear_output_vector[-1]} | Desired Output: {nn.dataset_outputs} | Error: {nn.error_vector}")
 
-    # Print the output of the last layer
-    print("Output:", nn.nonlinear_output_vector[-1])
-    print("Error:", nn.error_vector)
-    nn.backward_calculation()
-    nn.forward_calculation()
-    print("Output:", nn.nonlinear_output_vector[-1])
-    print("Error:", nn.error_vector)
+        avg_error = total_error / input_data.shape[0]
+
+        # Average error for the epoch
+        print(f"Average Error for Epoch {epoch}: {avg_error}")
+
+        # Stop if error is below the threshold
+        if avg_error < error_threshold:
+            print("Training complete. Error is below threshold.")
+            break
+
+    # Final output and error after training
+    print("Final output:", nn.nonlinear_output_vector[-1])
+    print("Final error:", nn.error_vector)
+
+
 
 if __name__ == "__main__":
     main()
