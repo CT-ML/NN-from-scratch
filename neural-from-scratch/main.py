@@ -164,11 +164,11 @@ class NeuralNetwork:
 
 def main():
     # Load the dataset from the CSV file
-    data = pd.read_csv('data/wisc_bc_data_normalized.csv')
+    data = pd.read_csv('data/wisc_bc_data_train.csv')
 
     # Define the number of neurons per layer (dynamic based on input size)
     input_size = data.shape[1] - 1  # Assuming the first column is the output
-    nb_of_neurons_per_layer = np.arange(input_size, 0, -1)  # Array with decreasing neurons for each layer
+    nb_of_neurons_per_layer = np.array([input_size, 32, 16, 1])  # Array with decreasing neurons for each layer
 
     # Define activation functions per layer (sigmoid for all layers)
     activation_function_array = []
