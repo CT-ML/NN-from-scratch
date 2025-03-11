@@ -128,30 +128,27 @@ class NeuralNetwork:
             
         # print("current weights: "+str(self.weights))
         # print("old weights: "+str(self.old_weights))
-
-def duplicate_positive():
-
-# Load the dataset
+def duplicate_positive(n):
+    # Load the dataset
     data = pd.read_csv('data/wisc_bc_train.csv')
 
     # Find rows where first column equals 1 (cancer cases)
     cancer_rows = data[data.iloc[:, 0] == 1]
-
-    # Concatenate the original data with the cancer rows (effectively duplicating them)
-    pd.concat([data, cancer_rows], ignore_index=True)
-    pd.concat([data, cancer_rows], ignore_index=True)
-    new_data = pd.concat([data, cancer_rows], ignore_index=True)
+    
+    # Start with the original dataset
+    new_data = data.copy()
+    
+    # Add the cancer rows n times
+    for _ in range(n):
+        new_data = pd.concat([new_data, cancer_rows], ignore_index=True)
 
     # Save the new dataset
     new_data.to_csv('data/wisc_bc_train_duplicated.csv', index=False)
 
-    print(f"Original dataset size: {len(data)}")
-    print(f"New dataset size: {len(new_data)}")
-
 
 def main():
     # Load the dataset from the CSV file
-    duplicate_positive()
+    duplicate_positive(2)
     data = pd.read_csv('data/wisc_bc_train_duplicated.csv')
 
     # Define the number of neurons per layer (dynamic based on input size)
