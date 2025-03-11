@@ -129,42 +129,30 @@ class NeuralNetwork:
         # print("current weights: "+str(self.weights))
         # print("old weights: "+str(self.old_weights))
 
-            
-# def main():
-#     # Define network parameters
-#     nb_of_neurons_per_layer = [3, 3, 3, 1]  # Input layer, one hidden layer, output layer
-#     activation_function_array = ["sigmoid", "sigmoid", "sigmoid", "sigmoid"]  # Activation functions per layer
-#     learning_rate = 0.01
-#     momentum_turn = 0.7
-#     nb_input=3
+def duplicate_positive():
 
-#     # Create neural network
-#     nn = NeuralNetwork(nb_input, nb_of_neurons_per_layer, activation_function_array, learning_rate, momentum_turn)
+# Load the dataset
+    data = pd.read_csv('data/wisc_bc_train.csv')
 
-#     # Dummy input
-#     input_data = np.array([1, 1, 1])
+    # Find rows where first column equals 1 (cancer cases)
+    cancer_rows = data[data.iloc[:, 0] == 1]
 
-#     # Assign input to the first layer's nonlinear output vector
-#     nn.setInputs(input_data)
+    # Concatenate the original data with the cancer rows (effectively duplicating them)
+    pd.concat([data, cancer_rows], ignore_index=True)
+    pd.concat([data, cancer_rows], ignore_index=True)
+    new_data = pd.concat([data, cancer_rows], ignore_index=True)
 
-#     nn.dataset_outputs = np.array([0])
+    # Save the new dataset
+    new_data.to_csv('data/wisc_bc_train_duplicated.csv', index=False)
 
-#     # Perform forward calculation
-#     nn.forward_calculation()
-
-#     # Print the output of the last layer
-#     print("Output:", nn.nonlinear_output_vector[-1])
-#     print("Error:", nn.error_vector)
-#     for _ in range(1000000):
-#         nn.backward_calculation()
-#         nn.forward_calculation()
-#         print("Output:", nn.nonlinear_output_vector[-1])
-#         print("Error:", nn.error_vector)
+    print(f"Original dataset size: {len(data)}")
+    print(f"New dataset size: {len(new_data)}")
 
 
 def main():
     # Load the dataset from the CSV file
-    data = pd.read_csv('data/wisc_bc_data_train.csv')
+    duplicate_positive()
+    data = pd.read_csv('data/wisc_bc_train_duplicated.csv')
 
     # Define the number of neurons per layer (dynamic based on input size)
     input_size = data.shape[1] - 1  # Assuming the first column is the output
@@ -179,9 +167,9 @@ def main():
     print(activation_function_array)
 
     # Set learning parameters
-    learning_rate = 0.005
+    learning_rate = 0.05
     momentum_turn = 0.3
-    error_threshold = 0.01  # Define the error threshold for stopping
+    error_threshold = 0.02  # Define the error threshold for stopping
 
     # Create neural network
     nn = NeuralNetwork(input_size, nb_of_neurons_per_layer, activation_function_array, learning_rate, momentum_turn)
@@ -226,8 +214,43 @@ def main():
     # Final output and error after training
     print("Final output:", nn.nonlinear_output_vector[-1])
     print("Final error:", nn.error_vector)
-
-
+    print("now for testing data")
+    try:
+        test_data = pd.read_csv('data/wisc_bc_test.csv')
+        
+        # Split test data
+        test_inputs = test_data.iloc[:, 1:].values
+        test_outputs = test_data.iloc[:, 0].values
+        
+        # Evaluate
+        correct = 0
+        false_neg = 0
+        false_pos = 0
+        
+        for i in range(test_inputs.shape[0]):
+            nn.setInputs(test_inputs[i])
+            nn.forward_calculation()
+            if nn.nonlinear_output_vector[-1] >= 0.2:
+                prediction = 1
+            else:
+                prediction = 0
+            
+            if prediction == test_outputs[i]:
+                correct += 1
+            elif test_outputs[i] == 1 and prediction == 0:
+                false_neg += 1
+                print("for false_neg" + str(nn.nonlinear_output_vector[-1]))
+            elif test_outputs[i] == 0 and prediction == 1:
+                false_pos += 1
+        
+        print(f"\nTest Results:")
+        print(f"Accuracy: {correct/test_inputs.shape[0]:.4f}")
+        print("Correct: " + str(correct))
+        print(f"False Negatives: {false_neg}")
+        print(f"False Positives: {false_pos}")
+        
+    except Exception as e:
+        print(f"Could not evaluate test data: {e}")
 
 if __name__ == "__main__":
     main()
