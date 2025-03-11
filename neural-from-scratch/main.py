@@ -144,7 +144,18 @@ def duplicate_positive(n):
 
     # Save the new dataset
     new_data.to_csv('data/wisc_bc_train_duplicated.csv', index=False)
+def save_neural_network(nn, filename):
+    """Save the trained neural network to a file using pickle"""
+    with open(filename, 'wb') as f:
+        pickle.dump(nn, f)
+    print(f"Neural network saved to {filename}")
 
+def load_neural_network(filename):
+    """Load a neural network from a file"""
+    with open(filename, 'rb') as f:
+        nn = pickle.load(f)
+    print(f"Neural network loaded from {filename}")
+    return nn
 
 def main():
     # Load the dataset from the CSV file
@@ -164,9 +175,9 @@ def main():
     print(activation_function_array)
 
     # Set learning parameters
-    learning_rate = 0.05
-    momentum_turn = 0.3
-    error_threshold = 0.02  # Define the error threshold for stopping
+    learning_rate = 0.047
+    momentum_turn = 0.2
+    error_threshold = 0.04  # Define the error threshold for stopping
 
     # Create neural network
     nn = NeuralNetwork(input_size, nb_of_neurons_per_layer, activation_function_array, learning_rate, momentum_turn)
@@ -212,6 +223,7 @@ def main():
     print("Final output:", nn.nonlinear_output_vector[-1])
     print("Final error:", nn.error_vector)
     print("now for testing data")
+    save_neural_network(nn, 'trained_nn_on_0.04_error_0.047_learning_rate_0.2_momentum_turn.pkl')
     try:
         test_data = pd.read_csv('data/wisc_bc_test.csv')
         
