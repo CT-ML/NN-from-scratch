@@ -35,6 +35,8 @@ class NeuralNetwork:
         self.momentum_turn = momentum_turn
         self.nb_of_layers = len(self.nb_of_neurons_per_layer)
 
+        self.error_threshold = 0
+
         #TODO optimize vector lengths
         self.internal_activity_vector = [] # output before activation function
         self.nonlinear_output_vector = [] # output after activation function
@@ -86,18 +88,8 @@ class NeuralNetwork:
 
 
 
-            # randomise weights
-        # for layer in range(self.nb_of_layers - 1): # layer
-        #     for input in range(self.nb_of_neurons_per_layer[layer]): # neuron
-        #         for connection in range(self.nb_of_neurons_per_layer[layer + 1]): # connection
-        #             self.weights[layer][input, connection] = np.random.rand()
-
-
     def forward_calculation(self):
         for layer in range(1, self.nb_of_layers): 
-            #TODO add bias
-          #  print("self.nonlinear_output_vector["+str(layer-1)+"]: " +str(self.nonlinear_output_vector[layer-1]))
-           # print("self.weights["+str(layer-1)+"]: "+str(self.weights[layer-1]))
             self.internal_activity_vector[layer] = np.dot(self.nonlinear_output_vector[layer-1], self.weights[layer-1])
             # apply activation function
             self.nonlinear_output_vector[layer][0 if layer==self.nb_of_layers-1 else 1 :] = self.activations[self.activation_function_array[layer-1]](self.internal_activity_vector[layer])
@@ -178,7 +170,7 @@ def main():
     learning_rate = 0.047
     momentum_turn = 0.2
     error_threshold = 0.04  # Define the error threshold for stopping
-
+    nn.error_threshold = error_threshold
     # Create neural network
     nn = NeuralNetwork(input_size, nb_of_neurons_per_layer, activation_function_array, learning_rate, momentum_turn)
     print(nb_of_neurons_per_layer)
