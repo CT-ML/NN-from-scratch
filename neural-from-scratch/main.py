@@ -167,10 +167,10 @@ def main():
     print(activation_function_array)
 
     # Set learning parameters
-    learning_rate = 0.047
+    learning_rate = 0.01
     momentum_turn = 0.2
     error_threshold = 0.04  # Define the error threshold for stopping
-    nn.error_threshold = error_threshold
+    error_threshold = error_threshold
     # Create neural network
     nn = NeuralNetwork(input_size, nb_of_neurons_per_layer, activation_function_array, learning_rate, momentum_turn)
     print(nb_of_neurons_per_layer)
@@ -199,7 +199,7 @@ def main():
             nn.backward_calculation()
 
             # Print the output, desired output, and error for the current input
-            print(f"Sample {i+1} - Predicted Output: {nn.nonlinear_output_vector[-1]} | Desired Output: {nn.dataset_outputs} | Error: {nn.error_vector}")
+            # print(f"Sample {i+1} - Predicted Output: {nn.nonlinear_output_vector[-1]} | Desired Output: {nn.dataset_outputs} | Error: {nn.error_vector}")
 
         avg_error = total_error / input_data.shape[0]
 
@@ -215,7 +215,7 @@ def main():
     print("Final output:", nn.nonlinear_output_vector[-1])
     print("Final error:", nn.error_vector)
     print("now for testing data")
-    save_neural_network(nn, 'trained_nn_on_0.04_error_0.047_learning_rate_0.2_momentum_turn.pkl')
+    save_neural_network(nn, 'new/trained_nn_on_'+str(error_threshold)+'_error_'+str(learning_rate)+'_learning_rate_+'+str(momentum_turn)+'_momentum_turn.pkl')
     try:
         test_data = pd.read_csv('data/wisc_bc_test.csv')
         
