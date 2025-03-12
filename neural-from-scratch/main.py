@@ -26,7 +26,7 @@ def tanh_grad(y):
 
 
 class NeuralNetwork:
-    def __init__(self, nb_input, nb_of_neurons_per_layer, activation_function_array, learning_rate, momentum_turn):
+    def __init__(self, nb_of_neurons_per_layer, activation_function_array, learning_rate, momentum_turn):
         # inserting first layer (inputs) from main no need for this
         # nb_of_neurons_per_layer.insert(0, nb_input)
         self.nb_of_neurons_per_layer =  nb_of_neurons_per_layer
@@ -35,9 +35,7 @@ class NeuralNetwork:
         self.momentum_turn = momentum_turn
         self.nb_of_layers = len(self.nb_of_neurons_per_layer)
 
-        self.error_threshold = 0
 
-        #TODO optimize vector lengths
         self.internal_activity_vector = [] # output before activation function
         self.nonlinear_output_vector = [] # output after activation function
         self.threshold_vector = []
@@ -60,20 +58,16 @@ class NeuralNetwork:
         self.activations = {
             "sigmoid": sigmoid,
             "tanh": tanh,
-            "step": step_function,
         }
         self.activations_gradient={
             "sigmoid": sigmoid_grad,
             "tanh": tanh_grad,
-            "step": step_function_grad,
         }
         
 
         self.dataset_inputs = np.array([])
         self.dataset_outputs = np.array([])
         
-        # weight initialization
-
 
         # Initialize a list of numpy 2d arrays
         self.weights = []
@@ -93,7 +87,7 @@ class NeuralNetwork:
             self.internal_activity_vector[layer] = np.dot(self.nonlinear_output_vector[layer-1], self.weights[layer-1])
             # apply activation function
             self.nonlinear_output_vector[layer][0 if layer==self.nb_of_layers-1 else 1 :] = self.activations[self.activation_function_array[layer-1]](self.internal_activity_vector[layer])
-            #TODO combine
+        
         
         # calculating error
         self.error_vector = self.dataset_outputs - self.nonlinear_output_vector[self.nb_of_layers - 1]
@@ -167,12 +161,11 @@ def main():
     print(activation_function_array)
 
     # Set learning parameters
-    learning_rate = 0.03
+    learning_rate = 0.04
     momentum_turn = 0.2
-    error_threshold = 0.03  # Define the error threshold for stopping
-    error_threshold = error_threshold
+    error_threshold = 0.04  # Define the error threshold for stopping
     # Create neural network
-    nn = NeuralNetwork(input_size, nb_of_neurons_per_layer, activation_function_array, learning_rate, momentum_turn)
+    nn = NeuralNetwork(nb_of_neurons_per_layer, activation_function_array, learning_rate, momentum_turn)
     print(nb_of_neurons_per_layer)
     # Start training loop
     epoch = 0
@@ -215,7 +208,7 @@ def main():
     print("Final output:", nn.nonlinear_output_vector[-1])
     print("Final error:", nn.error_vector)
     print("now for testing data")
-    save_neural_network(nn, 'error_change/trained_nn_on_'+str(error_threshold)+'_error_'+str(learning_rate)+'_learning_rate_+'+str(momentum_turn)+'_momentum_turn.pkl')
+    save_neural_network(nn, 'trained_nn_on_'+str(error_threshold)+'_error_'+str(learning_rate)+'_learning_rate_+'+str(momentum_turn)+'_momentum_turn2.pkl')
     try:
         test_data = pd.read_csv('data/wisc_bc_test.csv')
         
@@ -231,7 +224,7 @@ def main():
         for i in range(test_inputs.shape[0]):
             nn.setInputs(test_inputs[i])
             nn.forward_calculation()
-            if nn.nonlinear_output_vector[-1] >= 0.2:
+            if nn.nonlinear_output_vector[-1] >= 0.1:
                 prediction = 1
             else:
                 prediction = 0
