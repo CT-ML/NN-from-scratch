@@ -208,7 +208,7 @@ def main():
     print("Final output:", nn.nonlinear_output_vector[-1])
     print("Final error:", nn.error_vector)
     print("now for testing data")
-    save_neural_network(nn, 'trained_nn_on_'+str(error_threshold)+'_error_'+str(learning_rate)+'_learning_rate_+'+str(momentum_turn)+'_momentum_turn2.pkl')
+    save_neural_network(nn, 'trained_nn_on_'+str(error_threshold)+'_error_'+str(learning_rate)+'_learning_rate_'+str(momentum_turn)+'_momentum_turn2.pkl')
     try:
         test_data = pd.read_csv('data/wisc_bc_test.csv')
         
