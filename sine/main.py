@@ -150,7 +150,7 @@ def main():
     # Set learning parameters
     learning_rate = 0.01
     momentum_turn = 0.1
-    error_threshold = 0.005  # Define the error threshold for stopping
+    error_threshold = 0.015  # Define the error threshold for stopping
     # Create neural network
     nn = NeuralNetwork(nb_of_neurons_per_layer, activation_function_array, learning_rate, momentum_turn)
     print(nb_of_neurons_per_layer)

@@ -3,50 +3,26 @@ import pandas as pd
 import os
 from main import *
 from tabulate import tabulate
+import matplotlib.pyplot as plt
+
+def input_to_periodic_value(input):
+    neg_flag = 0
+    if input < 0:
+        neg_flag = 1
+        input = input * -1
+    periodic_value = input % 2
+    if periodic_value >= 1:
+        neg_flag = neg_flag^1
+        periodic_value = periodic_value - 1
+    periodic_value = periodic_value
+    print(input, neg_flag, periodic_value)
+    return periodic_value, neg_flag
+    
 
 def load_neural_network(filename):
     """Load the trained neural network from a file."""
     with open(filename, 'rb') as f:
         return pickle.load(f)
-
-def test_neural_network(nn_filename, test_data_filename, threshold=0.1):
-    """Load the trained neural network and test it on a given dataset."""
-    try:
-        # Load the neural network
-        nn = load_neural_network(nn_filename)
-        
-        # Load test data
-        test_data = pd.read_csv(test_data_filename)
-        
-        # Split test data into inputs and expected outputs
-        test_inputs = test_data.iloc[:, 1:].values
-        test_outputs = test_data.iloc[:, 0].values
-        
-        # Initialize evaluation metrics
-        correct = 0
-        false_neg = 0
-        false_pos = 0
-        
-        # Perform evaluation
-        for i in range(test_inputs.shape[0]):
-            nn.setInputs(test_inputs[i])
-            nn.forward_calculation()
-            prediction = 1 if nn.nonlinear_output_vector[-1] >= threshold else 0
-            
-            if prediction == test_outputs[i]:
-                correct += 1
-            elif test_outputs[i] == 1 and prediction == 0:
-                false_neg += 1
-            elif test_outputs[i] == 0 and prediction == 1:
-                false_pos += 1
-        
-        # Calculate accuracy
-        accuracy = correct / test_inputs.shape[0]
-        return (accuracy, correct, false_neg, false_pos)
-    
-    except Exception as e:
-        print(f"Could not evaluate {nn_filename}: {e}")
-        return None
 
 def extract_params(filename):
     """Extract error, learning rate, and momentum from the filename without regex."""
@@ -63,26 +39,32 @@ def extract_params(filename):
         return None, None, None
 
 def main():
-    """Test all .pkl neural network files in the current directory and print results in a table."""
-    test_data_filename = 'data/wisc_bc_test.csv'
-    results = []
-    
-    for filename in os.listdir('.'):
-        if filename.endswith('.pkl'):
-            nn = load_neural_network(filename)
-            learning_rate = nn.learning_rate
-            momentum = nn.momentum_turn
-            parts = filename.split("error_")
+    test_data = pd.read_csv("data/data_test.csv")
+    input_test = test_data.iloc[:, 0].values  # Assuming first column is input
+    output_test = test_data.iloc[:, 1].values  # Assuming second column is expected output
 
-            # Take the part after 'error_' and extract the first number
-            error = float(parts[1].split("_")[0])
-            result = test_neural_network(filename, test_data_filename)
-            if result:
-                accuracy, correct, false_neg, false_pos = result
-                results.append([learning_rate, momentum, error, f"{accuracy:.4f}", correct, false_neg, false_pos, ])
-    
-    # Print results as a table
-    print(tabulate(results, headers=["Learning Rate", "Momentum", "Error", "Accuracy", "Correct", "False Negatives", "False Positives"], tablefmt="grid"))
+    # Initialize neural network
+    nn = load_neural_network("trained_nn_on_0.015_error_0.01_learning_rate_0.1_momentum_turn2.pkl")  # Ensure this matches your class constructor
+
+    # Run the test dataset through the trained network
+    predicted_test_values = []
+    for i in range(input_test.shape[0]):
+        periodic_input, neg_flag = input_to_periodic_value(input_test[i])
+        nn.setInputs(periodic_input)
+        nn.forward_calculation()
+        nn.nonlinear_output_vector[-1] *= (-1)**neg_flag
+        predicted_test_values.append(nn.nonlinear_output_vector[-1].copy())
+        print(periodic_input)
+
+    # Plot results
+    plt.figure(figsize=(8, 6))
+    plt.scatter(input_test, output_test, color='blue', label='Expected')
+    plt.scatter(input_test, predicted_test_values, color='red', label='Predicted')
+    plt.title("Neural Network Test Results")
+    plt.xlabel("Input")
+    plt.ylabel("Output")
+    plt.legend()
+    plt.show()
 
 if __name__ == "__main__":
     main()
