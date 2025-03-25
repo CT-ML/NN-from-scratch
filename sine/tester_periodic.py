@@ -44,7 +44,7 @@ def main():
     output_test = test_data.iloc[:, 1].values  # Assuming second column is expected output
 
     # Initialize neural network
-    nn = load_neural_network("trained_nn_on_0.015_error_0.01_learning_rate_0.1_momentum_turn2.pkl")  # Ensure this matches your class constructor
+    nn = load_neural_network("periodic_trained_nn_on_0.015_error_0.01_learning_rate_0.1_momentum_turn2.pkl")  # Ensure this matches your class constructor
 
     # Run the test dataset through the trained network
     predicted_test_values = []

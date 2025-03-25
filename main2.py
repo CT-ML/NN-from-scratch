@@ -132,15 +132,15 @@ def load_neural_network(filename):
 def main():
     # Load the dataset from the CSV file
 
-    data = pd.read_csv('data/data.csv')
+    data = pd.read_csv('data/datasetFull.csv')
 
     # Define the number of neurons per layer (dynamic based on input size)
     input_size = data.shape[1] - 1  # Assuming the first column is the output
     print('input_size: '+str(input_size))
-    nb_of_neurons_per_layer = np.array([input_size, 10, 10, 1])
+    nb_of_neurons_per_layer = np.array([input_size, 10, 10, 10, 1])
 
     # Define activation functions per layer (sigmoid for all layers)
-    activation_function_array = ["tanh", "tanh", "tanh"]
+    activation_function_array = ["tanh", "tanh", "tanh","tanh"]
     # for _ in range(len(nb_of_neurons_per_layer) - 1):
     #     activation_function_array.append("sigmoid")
     
@@ -197,7 +197,6 @@ def main():
         ax.set_title(f"Epoch {epoch}")
         ax.set_xlabel("Input")
         ax.set_ylabel("Output")
-        ax.set_ylim(0, 1)
         ax.legend()
         plt.draw()
         plt.pause(0.1)
@@ -215,7 +214,7 @@ def main():
     # Final output and error after training
     print("Final output:", nn.nonlinear_output_vector[-1])
     print("Final error:", nn.error_vector)
-    save_neural_network(nn, 'periodic_trained_nn_on_'+str(error_threshold)+'_error_'+str(learning_rate)+'_learning_rate_'+str(momentum_turn)+'_momentum_turn2.pkl')
+    save_neural_network(nn, 'trained_nn_on_'+str(error_threshold)+'_error_'+str(learning_rate)+'_learning_rate_'+str(momentum_turn)+'_momentum_turn2.pkl')
     
 
 if __name__ == "__main__":

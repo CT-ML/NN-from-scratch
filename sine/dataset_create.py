@@ -46,7 +46,7 @@ def generate_training_data(filename, x_min=0, x_max=1, num_points=1000):
     print(f"Generated {num_points} data points from x={x_min} to x={x_max}")
 
 def main():
-    generate_training_data('data/data_test.csv', -4, 4, 2000)
+    generate_training_data('data/datasetFull.csv', -2, 2, 2000)
 
 if __name__ == "__main__":
     main()
