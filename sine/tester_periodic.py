@@ -39,12 +39,12 @@ def extract_params(filename):
         return None, None, None
 
 def main():
-    test_data = pd.read_csv("data/data_test.csv")
+    test_data = pd.read_csv("data/data_test2.csv")
     input_test = test_data.iloc[:, 0].values  # Assuming first column is input
     output_test = test_data.iloc[:, 1].values  # Assuming second column is expected output
 
     # Initialize neural network
-    nn = load_neural_network("periodic_trained_nn_on_0.015_error_0.01_learning_rate_0.1_momentum_turn2.pkl")  # Ensure this matches your class constructor
+    nn = load_neural_network("periodic_trained_nn_on_0.015_error_0.02_learning_rate_0.1_momentum_turn2.pkl")  # Ensure this matches your class constructor
 
     # Run the test dataset through the trained network
     predicted_test_values = []

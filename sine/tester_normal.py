@@ -28,7 +28,7 @@ def extract_params(filename):
         return None, None, None
 
 def main():
-    test_data = pd.read_csv("data/data_test.csv")
+    test_data = pd.read_csv("data/data_test2.csv")
     input_test = test_data.iloc[:, 0].values  # Assuming first column is input
     output_test = test_data.iloc[:, 1].values  # Assuming second column is expected output
 
