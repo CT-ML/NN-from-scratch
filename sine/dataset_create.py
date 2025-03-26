@@ -15,15 +15,7 @@ def calculate_y(x):
   return y
 
 def generate_training_data(filename, x_min=0, x_max=1, num_points=1000):
-    """
-    Generate a CSV file with x values and corresponding y values.
-    
-    Parameters:
-    filename (str): Name of the output CSV file
-    x_min (float): Minimum value for x
-    x_max (float): Maximum value for x
-    num_points (int): Number of data points to generate
-    """
+
     directory = os.path.dirname(filename)
     if directory and not os.path.exists(directory):
         os.makedirs(directory)
