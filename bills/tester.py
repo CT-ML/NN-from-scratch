@@ -9,7 +9,7 @@ def load_neural_network(filename):
     with open(filename, 'rb') as f:
         return pickle.load(f)
 
-def test_neural_network(nn_filename, test_data_filename, threshold=0.1):
+def test_neural_network(nn_filename, test_data_filename, threshold=0.015):
     """Load the trained neural network and test it on a given dataset."""
     try:
         # Load the neural network

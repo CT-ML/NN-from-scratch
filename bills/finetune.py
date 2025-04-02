@@ -9,7 +9,7 @@ def load_neural_network(filename):
 
 def main():
     # Load the dataset from the CSV file
-    data = pd.read_csv('data/banknote_train.csv')
+    data = pd.read_csv('data/banknote_train_balanced.csv')
 
     # Load the pre-trained neural network
     pkl_filename = "finetuned3_nn_on_0.02_error_0.02_learning_rate_0.5_momentum_turn2.pkl"
