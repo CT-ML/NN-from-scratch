@@ -12,14 +12,14 @@ def main():
     data = pd.read_csv('data/banknote_train_balanced.csv')
 
     # Load the pre-trained neural network
-    pkl_filename = "finetuned3_nn_on_0.02_error_0.02_learning_rate_0.5_momentum_turn2.pkl"
+    pkl_filename = "finetuned_dup_32,32/finetuned3_nn_on_0.012_error_0.02_learning_rate_0.2_momentum_turn2.pkl"
     nn = load_neural_network(pkl_filename)
     print("Loaded neural network from", pkl_filename)
 
     # Set learning parameter
-    learning_rate = 0.02
-    momentum_turn = 0.2
-    error_threshold = 0.015  # Define the error threshold for stopping
+    learning_rate = 0.01
+    momentum_turn = 0.1
+    error_threshold = 0.01  # Define the error threshold for stopping
 
     nn.learning_rate = learning_rate
     nn.momentum_turn = momentum_turn
