@@ -145,12 +145,11 @@ def load_neural_network(filename):
 
 def main():
     # Load the dataset from the CSV file
-    duplicate_positive(2)
-    data = pd.read_csv('data/wisc_bc_train_duplicated.csv')
+    data = pd.read_csv('data/mnist_train.csv')
 
     # Define the number of neurons per layer (dynamic based on input size)
     input_size = data.shape[1] - 1  # Assuming the first column is the output
-    nb_of_neurons_per_layer = np.array([input_size, 32, 16, 1])  # Array with decreasing neurons for each layer
+    nb_of_neurons_per_layer = np.array([input_size, 512, 256, 1])  # Array with decreasing neurons for each layer
 
     # Define activation functions per layer (sigmoid for all layers)
     activation_function_array = []
@@ -210,7 +209,7 @@ def main():
     print("now for testing data")
     save_neural_network(nn, 'trained_nn_on_'+str(error_threshold)+'_error_'+str(learning_rate)+'_learning_rate_'+str(momentum_turn)+'_momentum_turn2.pkl')
     try:
-        test_data = pd.read_csv('data/wisc_bc_test.csv')
+        test_data = pd.read_csv('data/mnist_test.csv')
         
         # Split test data
         test_inputs = test_data.iloc[:, 1:].values

@@ -13,9 +13,6 @@ def normalize_csv(file_path, output_path):
     
     # Drop the first column
     df = df.iloc[:, 1:]
-    
-    # Replace 'B' with 0 and 'M' with 1 in the first column
-    df.iloc[:, 0] = df.iloc[:, 0].replace({'B': 0, 'M': 1})
 
     # Identify numerical columns
     numeric_cols = df.select_dtypes(include=[np.number]).columns
@@ -28,9 +25,9 @@ def normalize_csv(file_path, output_path):
     print(f"Normalized CSV saved to {output_path}")
 
 # Example usage
-# input_file = "data/wisc_bc_data.csv"
-# output_file = "data/wisc_bc_data_normalized.csv"
-# normalize_csv(input_file, output_file)
+input_file = "data/mnist_train.csv"
+output_file = "data/mnist_train_normalized.csv"
+normalize_csv(input_file, output_file)
 
 
     # # Example usage
@@ -60,10 +57,13 @@ def split_csv(file_path, train_output, test_output, train_ratio=0.8):
     print(f"Testing set saved to {test_output} ({len(test_df)} rows)")
 
 # # Example usage
-input_file = "data/wisc_bc_data_normalized.csv"
-train_file = "data/wisc_bc_train.csv"
-test_file = "data/wisc_bc_test.csv"
-split_csv(input_file, train_file, test_file)
+# input_file = "data/wisc_bc_data_normalized.csv"
+# train_file = "data/wisc_bc_train.csv"
+# test_file = "data/wisc_bc_test.csv"
+# split_csv(input_file, train_file, test_file)
+
+
+
 
 
 
