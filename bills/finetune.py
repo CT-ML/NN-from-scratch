@@ -18,7 +18,7 @@ def main():
 
     # Set learning parameter
     learning_rate = 0.01
-    momentum_turn = 0.1
+    momentum_turn = 0.2
     error_threshold = 0.01  # Define the error threshold for stopping
 
     nn.learning_rate = learning_rate
