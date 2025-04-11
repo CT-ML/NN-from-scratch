@@ -2,6 +2,7 @@ import pickle
 import numpy as np
 import pandas as pd
 
+##Activation functions
 def sigmoid(x):
     return 1 / (1 + np.exp(-x))
 
@@ -10,6 +11,16 @@ def tanh(x):
 
 def step_function(x):
     return np.where(x >= 0, 1, 0)
+def relu(x):
+    return np.maximum(0, x)
+
+def relu_derivative(x):
+    return x > 0      ##True =1 , Flase=0 , in python
+
+def softmax(x):
+    exp_x = np.exp(x - np.max(x, axis=1, keepdims=True))  # stability
+    return exp_x / np.sum(exp_x, axis=1, keepdims=True)
+
 
 def step_function_grad(y):
     return np.zeros_like(y)
