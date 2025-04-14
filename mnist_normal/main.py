@@ -18,8 +18,8 @@ def relu_derivative(x):
     return x > 0      ##True =1 , Flase=0 , in python
 
 def softmax(x):
-    exp_x = np.exp(x - np.max(x, axis=1, keepdims=True))  # stability
-    return exp_x / np.sum(exp_x, axis=1, keepdims=True)
+    exp_x = np.exp(x - np.max(x, axis=0, keepdims=True))  # stability : we remove the max just to nothav every big values
+    return exp_x / np.sum(exp_x, axis=0, keepdims=True)
 
 
 def step_function_grad(y):
@@ -34,7 +34,6 @@ def sigmoid_grad(y):
 #y is tanh(v)
 def tanh_grad(y):
     return np.multiply(1 - np.square(y), 1)
-
 
 class NeuralNetwork:
     def __init__(self, nb_of_neurons_per_layer, activation_function_array, learning_rate, momentum_turn):
@@ -69,10 +68,13 @@ class NeuralNetwork:
         self.activations = {
             "sigmoid": sigmoid,
             "tanh": tanh,
+            "relu": relu,
+            "softmax": softmax,
         }
         self.activations_gradient={
             "sigmoid": sigmoid_grad,
             "tanh": tanh_grad,
+            "relu": relu_derivative,
         }
         
 
@@ -97,23 +99,30 @@ class NeuralNetwork:
         for layer in range(1, self.nb_of_layers): 
             self.internal_activity_vector[layer] = np.dot(self.nonlinear_output_vector[layer-1], self.weights[layer-1])
             # apply activation function
-            self.nonlinear_output_vector[layer][0 if layer==self.nb_of_layers-1 else 1 :] = self.activations[self.activation_function_array[layer-1]](self.internal_activity_vector[layer])
-        
+# In your forward_calculation method:
+            if layer == self.nb_of_layers - 1 and self.activation_function_array[layer-1] == "softmax":
+                self.nonlinear_output_vector[layer] = softmax(self.internal_activity_vector[layer])
+            else:
+                self.nonlinear_output_vector[layer][0 if layer==self.nb_of_layers-1 else 1:] = self.activations[self.activation_function_array[layer-1]](self.internal_activity_vector[layer])        
         
         # calculating error
         self.error_vector = self.dataset_outputs - self.nonlinear_output_vector[self.nb_of_layers - 1]
 
     def setInputs(self, input_data):
+        # print("nonlinear_output shape:"+str(self.nonlinear_output_vector[0].shape))
         self.nonlinear_output_vector[0][1:] = input_data
 
     def backward_calculation(self):
-        self.local_gradient_vector[self.nb_of_layers - 1] = self.error_vector * \
-            (self.activations_gradient[self.activation_function_array[self.nb_of_layers - 2]](self.nonlinear_output_vector[self.nb_of_layers - 1]))
+        if self.activation_function_array[self.nb_of_layers - 2] == "softmax":
+            self.local_gradient_vector[self.nb_of_layers - 1] = self.error_vector
+        else:
+            self.local_gradient_vector[self.nb_of_layers - 1] = self.error_vector * \
+                (self.activations_gradient[self.activation_function_array[self.nb_of_layers - 2]](self.nonlinear_output_vector[self.nb_of_layers - 1]))
 
 
         for layer in range(self.nb_of_layers-2, 0, -1):
 
-            self.local_gradient_vector[layer] = (self.activations_gradient[self.activation_function_array[layer]](self.nonlinear_output_vector[layer][1:])) * \
+            self.local_gradient_vector[layer] = (self.activations_gradient[self.activation_function_array[layer-1]](self.nonlinear_output_vector[layer][1:])) * \
                 np.dot(self.weights[layer][1:], self.local_gradient_vector[layer + 1])
 
         for layer in range( self.nb_of_layers - 1):
@@ -123,24 +132,6 @@ class NeuralNetwork:
 
             self.weights[layer] = self.weights[layer] + delta_weights
             
-        # print("current weights: "+str(self.weights))
-        # print("old weights: "+str(self.old_weights))
-def duplicate_positive(n):
-    # Load the dataset
-    data = pd.read_csv('data/wisc_bc_train.csv')
-
-    # Find rows where first column equals 1 (cancer cases)
-    cancer_rows = data[data.iloc[:, 0] == 1]
-    
-    # Start with the original dataset
-    new_data = data.copy()
-    
-    # Add the cancer rows n times
-    for _ in range(n):
-        new_data = pd.concat([new_data, cancer_rows], ignore_index=True)
-
-    # Save the new dataset
-    new_data.to_csv('data/wisc_bc_train_duplicated.csv', index=False)
 def save_neural_network(nn, filename):
     """Save the trained neural network to a file using pickle"""
     with open(filename, 'wb') as f:
@@ -156,16 +147,15 @@ def load_neural_network(filename):
 
 def main():
     # Load the dataset from the CSV file
-    data = pd.read_csv('data/mnist_train.csv')
+    data = pd.read_csv('data/mnist_train_normalized_onehot.csv')
 
     # Define the number of neurons per layer (dynamic based on input size)
-    input_size = data.shape[1] - 1  # Assuming the first column is the output
-    nb_of_neurons_per_layer = np.array([input_size, 512, 256, 1])  # Array with decreasing neurons for each layer
+    input_size = 784
+    nb_of_neurons_per_layer = np.array([input_size, 20, 20, 20, 10])  # Array with decreasing neurons for each layer
 
     # Define activation functions per layer (sigmoid for all layers)
-    activation_function_array = []
-    for _ in range(len(nb_of_neurons_per_layer) - 1):
-        activation_function_array.append("sigmoid")
+    activation_function_array = ["sigmoid", "sigmoid", "sigmoid", "softmax"]    # for _ in range(len(nb_of_neurons_per_layer) - 1):
+    #     activation_function_array.append("sigmoid")
     
 
     print(activation_function_array)
@@ -173,7 +163,7 @@ def main():
     # Set learning parameters
     learning_rate = 0.04
     momentum_turn = 0.2
-    error_threshold = 0.04  # Define the error threshold for stopping
+    error_threshold = 0.1  # Define the error threshold for stopping
     # Create neural network
     nn = NeuralNetwork(nb_of_neurons_per_layer, activation_function_array, learning_rate, momentum_turn)
     print(nb_of_neurons_per_layer)
@@ -184,19 +174,18 @@ def main():
         print(f"Epoch {epoch}:")
         shuffled_data = data.sample(frac=1, random_state=None)
         # Split the dataset into inputs and outputs (no shuffle)
-        input_data = shuffled_data.iloc[:, 1:].values  # All columns except the first as input
-        output_data = shuffled_data.iloc[:, 0].values  # First column as output
-
+        input_data = shuffled_data.iloc[:, 10:].values  # All columns except the first 10 as input
+        output_data = shuffled_data.iloc[:, 0:10].values  # First 10 column as output
+        print("output shape:"+str(output_data.shape))
+        
         total_error = 0
         # Iterate through the dataset for training
         for i in range(input_data.shape[0]):
             # Set inputs and expected output for each training example
             nn.setInputs(input_data[i])
-            nn.dataset_outputs = np.array([output_data[i]])
-
+            nn.dataset_outputs = output_data[i]
             # Perform forward calculation
             nn.forward_calculation()
-
             # Calculate and accumulate the error
             total_error += abs(nn.error_vector)
             nn.backward_calculation()
@@ -204,7 +193,7 @@ def main():
             # Print the output, desired output, and error for the current input
             # print(f"Sample {i+1} - Predicted Output: {nn.nonlinear_output_vector[-1]} | Desired Output: {nn.dataset_outputs} | Error: {nn.error_vector}")
 
-        avg_error = total_error / input_data.shape[0]
+        avg_error = (total_error / input_data.shape[0]).sum()
 
         # Average error for the epoch
         print(f"Average Error for Epoch {epoch}: {avg_error}")
@@ -220,11 +209,12 @@ def main():
     print("now for testing data")
     save_neural_network(nn, 'trained_nn_on_'+str(error_threshold)+'_error_'+str(learning_rate)+'_learning_rate_'+str(momentum_turn)+'_momentum_turn2.pkl')
     try:
-        test_data = pd.read_csv('data/mnist_test.csv')
+        test_data = pd.read_csv('data/mnist_test_normalized_onehot.csv')
         
         # Split test data
-        test_inputs = test_data.iloc[:, 1:].values
-        test_outputs = test_data.iloc[:, 0].values
+        test_inputs = test_data.iloc[:, 10:].values
+        test_outputs = test_data.iloc[:, 0:10].values
+       
         
         # Evaluate
         correct = 0
