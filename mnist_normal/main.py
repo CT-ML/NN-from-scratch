@@ -151,10 +151,11 @@ def main():
 
     # Define the number of neurons per layer (dynamic based on input size)
     input_size = 784
-    nb_of_neurons_per_layer = np.array([input_size, 20, 20, 20, 10])  # Array with decreasing neurons for each layer
+    nb_of_neurons_per_layer = np.array([input_size, 20, 20, 15, 10])  # Array with decreasing neurons for each layer
 
     # Define activation functions per layer (sigmoid for all layers)
-    activation_function_array = ["sigmoid", "sigmoid", "sigmoid", "softmax"]    # for _ in range(len(nb_of_neurons_per_layer) - 1):
+    activation_function_array = ["sigmoid", "sigmoid", "sigmoid", "softmax"]    
+    # for _ in range(len(nb_of_neurons_per_layer) - 1):
     #     activation_function_array.append("sigmoid")
     
 

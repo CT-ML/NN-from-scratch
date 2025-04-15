@@ -15,7 +15,7 @@ def main():
     input_test = test_data.iloc[:, 10:].values  
     output_test = test_data.iloc[:, 0:10].values  # One-hot encoded labels
 
-    nn = load_neural_network("trained_nn_on_0.1_error_0.04_learning_rate_0.2_momentum_turn2.pkl")
+    nn = load_neural_network("20 20 15/finetuned2_trained_nn_on_0.066_error_0.02_learning_rate_0.2_momentum_turn2.pkl")
 
     y_true = []
     y_pred = []
