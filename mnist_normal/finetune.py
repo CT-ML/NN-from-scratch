@@ -1,4 +1,6 @@
 from main import *
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+import matplotlib.pyplot as plt
 
 def load_neural_network(filename):
     with open(filename, 'rb') as f:
@@ -10,11 +12,11 @@ def main():
 
     
     # Set learning parameters
-    learning_rate = 0.02
+    learning_rate = 0.01
     momentum_turn = 0.2
-    error_threshold = 0.066  # Define the error threshold for stopping
+    error_threshold = 0.03  # Define the error threshold for stopping
     # Create neural network
-    nn = load_neural_network("finetuned1_trained_nn_on_0.08_error_0.02_learning_rate_0.2_momentum_turn2.pkl")
+    nn = load_neural_network("25 25 25/finetuned3_trained_nn_on_0.04_error_0.01_learning_rate_0.2_momentum_turn2.pkl")
     nn.learning_rate = learning_rate
     nn.momentum_turn = momentum_turn
     # Start training loop
@@ -57,45 +59,71 @@ def main():
     print("Final output:", nn.nonlinear_output_vector[-1])
     print("Final error:", nn.error_vector)
     print("now for testing data")
-    save_neural_network(nn, 'finetuned2_trained_nn_on_'+str(error_threshold)+'_error_'+str(learning_rate)+'_learning_rate_'+str(momentum_turn)+'_momentum_turn2.pkl')
-    try:
-        test_data = pd.read_csv('data/mnist_test_normalized_onehot.csv')
+    save_neural_network(nn, 'finetuned4_trained_nn_on_'+str(error_threshold)+'_error_'+str(learning_rate)+'_learning_rate_'+str(momentum_turn)+'_momentum_turn2.pkl')
+    test_data = pd.read_csv("data/mnist_test_normalized_onehot.csv")
+    input_test = test_data.iloc[:, 10:].values  
+    output_test = test_data.iloc[:, 0:10].values  # One-hot encoded labels
+
+    nn = load_neural_network("25 25 25/trained_nn_on_0.1_error_0.04_learning_rate_0.2_momentum_turn2.pkl")
+
+    y_true = []
+    y_pred = []
+
+    # List to store incorrect predictions (images, true labels, predicted labels)
+    incorrect_predictions = []
+
+    for i in range(len(input_test)):
+        nn.setInputs(input_test[i])
+        nn.forward_calculation()
+
+        probs = nn.nonlinear_output_vector[-1]
+        predicted_class = np.argmax(probs)  # Get the index of the maximum value
+        true_class = np.argmax(output_test[i])
+
+        y_true.append(true_class)
+        y_pred.append(predicted_class)
+
+        # If prediction is incorrect, save the image and label information
+        if predicted_class != true_class:
+            incorrect_predictions.append((input_test[i], true_class, predicted_class, probs))
+
+        # Console output
+        print(f"Sample {i+1}")
+        print(f"Predicted Probabilities: {np.round(probs, 3)}")
+        print(f"Predicted: {predicted_class}, Actual: {true_class}")
+        print("-" * 60)
+
+    # Confusion matrix
+    cm = confusion_matrix(y_true, y_pred)
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm)
+    incorrect_count = np.sum(cm) - np.trace(cm)
+    disp.plot(cmap='Blues')
+    plt.title(f"Confusion Matrix\nIncorrect Predictions: {incorrect_count}")
+    plt.show()
+
+    # Accuracy
+    accuracy = np.trace(cm) / np.sum(cm)
+    print(f"\nOverall Accuracy: {accuracy:.4f}")
+
+    # Plot incorrect predictions
+    if incorrect_predictions:
+        print(f"\nTotal incorrect predictions: {len(incorrect_predictions)}")
         
-        # Split test data
-        test_inputs = test_data.iloc[:, 10:].values
-        test_outputs = test_data.iloc[:, 0:10].values
-       
-        
-        # Evaluate
-        correct = 0
-        false_neg = 0
-        false_pos = 0
-        
-        for i in range(test_inputs.shape[0]):
-            nn.setInputs(test_inputs[i])
-            nn.forward_calculation()
-            if nn.nonlinear_output_vector[-1] >= 0.1:
-                prediction = 1
-            else:
-                prediction = 0
-            
-            if prediction == test_outputs[i]:
-                correct += 1
-            elif test_outputs[i] == 1 and prediction == 0:
-                false_neg += 1
-                print("for false_neg" + str(nn.nonlinear_output_vector[-1]))
-            elif test_outputs[i] == 0 and prediction == 1:
-                false_pos += 1
-        
-        print(f"\nTest Results:")
-        print(f"Accuracy: {correct/test_inputs.shape[0]:.4f}")
-        print("Correct: " + str(correct))
-        print(f"False Negatives: {false_neg}")
-        print(f"False Positives: {false_pos}")
-        
-    except Exception as e:
-        print(f"Could not evaluate test data: {e}")
+        # Display the incorrect predictions
+        fig, axes = plt.subplots(nrows=3, ncols=3, figsize=(10, 10))
+        axes = axes.flatten()
+
+        for i, (image, true_class, pred_class, probs) in enumerate(incorrect_predictions[:9]):  # Display first 9 incorrect predictions
+            ax = axes[i]
+            image = image.reshape(28, 28)  # Reshape the flat vector to 28x28 for MNIST images
+            ax.imshow(image, cmap='gray')
+            ax.set_title(f"True: {true_class}, Pred: {pred_class}")
+            ax.axis('off')
+
+        plt.tight_layout()
+        plt.show()
 
 if __name__ == "__main__":
     main()
+
  
