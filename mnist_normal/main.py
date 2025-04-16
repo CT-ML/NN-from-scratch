@@ -151,7 +151,7 @@ def main():
 
     # Define the number of neurons per layer (dynamic based on input size)
     input_size = 784
-    nb_of_neurons_per_layer = np.array([input_size, 25, 25, 25, 10])  # Array with decreasing neurons for each layer
+    nb_of_neurons_per_layer = np.array([input_size, 64, 64, 32, 10])  # Array with decreasing neurons for each layer
 
     # Define activation functions per layer (sigmoid for all layers)
     activation_function_array = ["sigmoid", "sigmoid", "sigmoid", "softmax"]    
@@ -164,7 +164,7 @@ def main():
     # Set learning parameters
     learning_rate = 0.04
     momentum_turn = 0.2
-    error_threshold = 0.1  # Define the error threshold for stopping
+    error_threshold = 0.15  # Define the error threshold for stopping
     # Create neural network
     nn = NeuralNetwork(nb_of_neurons_per_layer, activation_function_array, learning_rate, momentum_turn)
     print(nb_of_neurons_per_layer)

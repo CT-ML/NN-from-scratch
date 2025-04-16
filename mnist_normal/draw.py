@@ -15,7 +15,7 @@ class DigitDrawer:
     def __init__(self, nn):
         self.nn = nn
         self.canvas_size = 280  # 280x280 pixels (10x scale of 28x28)
-        self.brush_size = 7
+        self.brush_size = 10
 
         self.root = tk.Tk()
         self.root.title("Draw a digit (0-9)")
@@ -74,7 +74,7 @@ class DigitDrawer:
 
 # Entry point
 def main():
-    nn = load_neural_network("20 20 20/finetuned2_trained_nn_on_0.04_error_0.01_learning_rate_0.2_momentum_turn2.pkl")
+    nn = load_neural_network("trained_nn_on_0.15_error_0.04_learning_rate_0.2_momentum_turn2.pkl")
     DigitDrawer(nn)
 
 if __name__ == "__main__":

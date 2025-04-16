@@ -12,11 +12,11 @@ def main():
 
     
     # Set learning parameters
-    learning_rate = 0.01
+    learning_rate = 0.02
     momentum_turn = 0.2
-    error_threshold = 0.03  # Define the error threshold for stopping
+    error_threshold = 0.08  # Define the error threshold for stopping
     # Create neural network
-    nn = load_neural_network("25 25 25/finetuned3_trained_nn_on_0.04_error_0.01_learning_rate_0.2_momentum_turn2.pkl")
+    nn = load_neural_network("trained_nn_on_0.15_error_0.04_learning_rate_0.2_momentum_turn2.pkl")
     nn.learning_rate = learning_rate
     nn.momentum_turn = momentum_turn
     # Start training loop
