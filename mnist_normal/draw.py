@@ -74,7 +74,7 @@ class DigitDrawer:
 
 # Entry point
 def main():
-    nn = load_neural_network("trained_nn_on_0.15_error_0.04_learning_rate_0.2_momentum_turn2.pkl")
+    nn = load_neural_network("64 64 32/finetuned2_trained_nn_on_0.05_error_0.02_learning_rate_0.2_momentum_turn2.pkl")
     DigitDrawer(nn)
 
 if __name__ == "__main__":

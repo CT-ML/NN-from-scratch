@@ -14,9 +14,9 @@ def main():
     # Set learning parameters
     learning_rate = 0.02
     momentum_turn = 0.2
-    error_threshold = 0.08  # Define the error threshold for stopping
+    error_threshold = 0.03  # Define the error threshold for stopping
     # Create neural network
-    nn = load_neural_network("trained_nn_on_0.15_error_0.04_learning_rate_0.2_momentum_turn2.pkl")
+    nn = load_neural_network("finetuned2_trained_nn_on_0.05_error_0.02_learning_rate_0.2_momentum_turn2.pkl")
     nn.learning_rate = learning_rate
     nn.momentum_turn = momentum_turn
     # Start training loop
@@ -59,7 +59,7 @@ def main():
     print("Final output:", nn.nonlinear_output_vector[-1])
     print("Final error:", nn.error_vector)
     print("now for testing data")
-    save_neural_network(nn, 'finetuned4_trained_nn_on_'+str(error_threshold)+'_error_'+str(learning_rate)+'_learning_rate_'+str(momentum_turn)+'_momentum_turn2.pkl')
+    save_neural_network(nn, 'finetuned3_trained_nn_on_'+str(error_threshold)+'_error_'+str(learning_rate)+'_learning_rate_'+str(momentum_turn)+'_momentum_turn2.pkl')
     test_data = pd.read_csv("data/mnist_test_normalized_onehot.csv")
     input_test = test_data.iloc[:, 10:].values  
     output_test = test_data.iloc[:, 0:10].values  # One-hot encoded labels
